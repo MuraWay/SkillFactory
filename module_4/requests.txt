@@ -1,0 +1,37 @@
+Задание 4.1
+
+База данных содержит список аэропортов практически всех крупных городов России. В большинстве городов есть только один аэропорт. Исключение составляет:
+Moscow, Ulyanovsk
+
+SELECT a.city,
+       count(*)
+FROM dst_project.AIRPORTS a
+GROUP BY a.city
+ORDER BY 2 DESC
+
+
+
+Задание 4.2
+
+Вопрос 1. Таблица рейсов содержит всю информацию о прошлых, текущих и запланированных рейсах. Сколько всего статусов для рейсов определено в таблице?
+
+SELECT count(DISTINCT f.status)
+FROM dst_project.FLIGHTS f
+ 
+ 
+Вопрос 2. Какое количество самолетов находятся в воздухе на момент среза в базе (статус рейса «самолёт уже вылетел и находится в воздухе»).
+
+-- Вариант 1 - по статусу
+SELECT count(f.flight_id)
+FROM dst_project.FLIGHTS f
+WHERE f.status = 'Departed'
+-- Ответ: 58
+ 
+-- Вариант 2 - есть фактическое время вылета и нет факт. времени прилёта
+SELECT count(f.flight_id)
+FROM dst_project.FLIGHTS f
+WHERE f.actual_departure IS NOT NULL
+  AND f.actual_arrival IS NULL
+-- Ответ: 58
+
+

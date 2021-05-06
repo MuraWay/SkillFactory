@@ -251,3 +251,132 @@ FROM
    ORDER BY 2 DESC
    LIMIT 1) f
     -- Boeing 737-300 
+
+
+Итоговый датасет
+
+WITH table_1 AS -- Перелёты + посадочные таллоны
+    (
+      SELECT 
+          tf.flight_id,
+          count(DISTINCT tf.fare_conditions) total_classes, -- сколько классов обслуживания на рейсе
+          count(CASE -- Количество проданных билетов по классам
+                  WHEN tf.fare_conditions = 'Economy' THEN tf.fare_conditions
+                  END) AS ticket_economy,
+          count(CASE
+                  WHEN tf.fare_conditions = 'Comfort' THEN tf.fare_conditions
+                  END) AS ticket_comfort,
+          count(CASE
+                  WHEN tf.fare_conditions = 'Business' THEN tf.fare_conditions
+                  END) AS ticket_bisiness,
+          count(tf.fare_conditions) AS ticket_total, -- всего продано билетов
+          sum(CASE -- Сумма проданных билетов по классам
+                  WHEN tf.fare_conditions = 'Economy' THEN tf.amount
+                  ELSE 0
+                  END) AS amount_economy,
+          sum(CASE
+                  WHEN tf.fare_conditions = 'Comfort' THEN tf.amount
+                  ELSE 0
+                  END) AS amount_comfort,
+          sum(CASE
+                  WHEN tf.fare_conditions = 'Business' THEN tf.amount
+                  ELSE 0
+                  END) AS amount_bisiness,
+          sum(tf.amount) amount_total
+      FROM dst_project.ticket_flights AS tf
+            JOIN dst_project.BOARDING_PASSES AS bp ON tf.ticket_no = bp.ticket_no
+                AND tf.flight_id = bp.flight_id
+      GROUP BY 1
+    ),
+    table_2 AS -- места в самолётах по классам
+        (
+          SELECT
+              a.aircraft_code,
+              a.model,
+              a.range,
+              count(CASE
+                        WHEN s.fare_conditions = 'Economy' THEN s.fare_conditions
+                    END) AS seat_economy,
+              count(CASE
+                        WHEN s.fare_conditions = 'Comfort' THEN s.fare_conditions
+                    END) AS seat_comfort,
+              count(CASE
+                        WHEN s.fare_conditions = 'Business' THEN s.fare_conditions
+                    END) AS seat_bisiness,
+              count(s.fare_conditions) AS seat_total
+          FROM dst_project.AIRCRAFTS AS a
+                JOIN dst_project.SEATS AS s ON a.aircraft_code = s.aircraft_code
+          GROUP BY 1,2,3
+        ),
+    table_3 AS -- время в пути (план и факт)
+        (
+        SELECT
+            f.flight_id,
+            (DATE_PART('day', f.scheduled_arrival::timestamp - f.scheduled_departure::timestamp) * 24 + 
+                  DATE_PART('hour', f.scheduled_arrival::timestamp - f.scheduled_departure::timestamp)) * 60 +
+                  DATE_PART('minute', f.scheduled_arrival::timestamp - f.scheduled_departure::timestamp) scheduled_duration_minute, -- запланированная длительность полета в минутах
+                  
+            (DATE_PART('day', f.actual_arrival::timestamp - f.actual_departure::timestamp) * 24 + 
+                  DATE_PART('hour', f.actual_arrival::timestamp - f.actual_departure::timestamp)) * 60 +
+                  DATE_PART('minute', f.actual_arrival::timestamp - f.actual_departure::timestamp) actual_duration_minute, -- фактическая длительность полета в минутах
+                  
+            (DATE_PART('day', f.actual_departure::timestamp - f.scheduled_departure::timestamp) * 24 + 
+                  DATE_PART('hour', f.actual_departure::timestamp - f.scheduled_departure::timestamp)) * 60 +
+                  DATE_PART('minute', f.actual_departure::timestamp - f.scheduled_departure::timestamp) departure_delay_minute, -- задержка вылета в минутах
+                 
+            (DATE_PART('day', f.actual_arrival::timestamp - f.scheduled_arrival::timestamp) * 24 + 
+                  DATE_PART('hour', f.actual_arrival::timestamp - f.scheduled_arrival::timestamp)) * 60 +
+                  DATE_PART('minute', f.actual_arrival::timestamp - f.scheduled_arrival::timestamp) delay_arrival_minute -- задержка прилёта в минутах
+        FROM dst_project.flights f
+        )
+SELECT
+    f.flight_id,
+    f.flight_no,
+    f.scheduled_departure,
+    f.scheduled_arrival,
+    f.departure_airport,
+    da.airport_name departure_airport_name,
+    da.city departure_city,
+    da.longitude departure_longitude,
+    da.latitude departure_latitude,
+    da.timezone departure_timezone,
+    f.arrival_airport,
+    aa.airport_name arrival_airport_name,
+    aa.city arrival_city,
+    aa.longitude arrival_longitude,
+    aa.latitude arrival_latitude,
+    aa.timezone arrival_timezone,
+    f.status,
+    f.actual_departure,
+    f.actual_arrival,
+    table_1.total_classes,
+    table_1.ticket_economy,
+    table_1.ticket_comfort,
+    table_1.ticket_bisiness,
+    table_1.ticket_total,
+    table_1.amount_economy,
+    table_1.amount_comfort,
+    table_1.amount_bisiness,
+    table_1.amount_total,
+    table_2.aircraft_code,
+    table_2.model,
+    table_2.range,
+    table_2.seat_economy,
+    table_2.seat_comfort,
+    table_2.seat_bisiness,
+    table_2.seat_total,
+    table_3.scheduled_duration_minute,
+    table_3.actual_duration_minute,
+    table_3.departure_delay_minute,
+    table_3.delay_arrival_minute
+FROM dst_project.flights f
+    LEFT JOIN table_1 ON f.flight_id = table_1.flight_id
+    LEFT JOIN table_2 ON f.aircraft_code = table_2.aircraft_code
+    LEFT JOIN table_3 ON f.flight_id = table_3.flight_id
+    LEFT JOIN dst_project.airports aa ON f.arrival_airport = aa.airport_code
+    LEFT JOIN dst_project.airports da ON f.departure_airport = da.airport_code
+WHERE f.departure_airport = 'AAQ'
+  AND (date_trunc('month', f.scheduled_departure) in ('2017-01-01',
+                                                      '2017-02-01',
+                                                      '2017-12-01'))
+  AND f.status not in ('Cancelled')

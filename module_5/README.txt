@@ -3,6 +3,17 @@ Kaggle: Dmitry Lepin
 
 Ноутбук создавался в среде Google Colab
 
+В репозитории файлы из Kagggle:
+sample_submission.csv
+test.csv
+train.csv
+
+Результат работы модели: submission.csv
+
+Pandas Profiling Report: report.html
+
+
+
 Что не получилось:
 1) Сдать работу в срок
 2) Поэкспериментировать с другими моделями, кроме LogisticRegression

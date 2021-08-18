@@ -25,3 +25,6 @@
 
 4. https://drive.google.com/file/d/1Xx69hloRiCNPA0H-UDXj-GXpZcTtskWj/view?usp=sharing
                                             submission_v_bagg_xgb.csv - лучшее решение - прогноз цен
+
+5. https://docs.google.com/document/d/1cQVcipuiupN9giPSfOpkTRTdZiBAnykuWUiZQ2rkddY/edit?usp=sharing
+                                             дубль описания проекта команды

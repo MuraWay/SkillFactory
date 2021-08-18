@@ -1,19 +1,27 @@
-Проект 6.
+Проект 6. Выбираем авто выгодно 
 
-файлы:
+
+
+Файлы:
 
 1. parser_auto_ru.ipynb - парсер сайта auto.ru
 
 2. [DSPR_26]_Car_Price_prediction_v2.ipynb - ноутбук по проекту
 
-3. parsing_auto_ru.csv - результат парсинга сайта, обучающий фрейм
+3. report.html - отчёт PANDAS PROFILING по parsing_auto_ru.csv
 
-4. test.csv - тестовый фрейм
+4. Описание проекта Team_DSPR_26.docx
 
-4. sample_submission.csv - образец
+Ссылки:
 
-5. submission_v_bagg_xgb.csv - лучшее решение - прогноз цен
+1. https://drive.google.com/file/d/1ISLVwAgfUVd-VXk7C7hOpw67wC1UaSP_/view?usp=sharing     
+                                            parsing_auto_ru.csv - результат парсинга сайта, обучающий фрейм
 
-6. report.html - отчёт PANDAS PROFILING по parsing_auto_ru.csv
+2. https://drive.google.com/file/d/1fFGmiYZrSlemBNNa0rXJlGVFaXDsubyR/view?usp=sharing
+                                            test.csv - тестовый фрейм
 
-7. Описание проекта Team_DSPR_26.docx
+3. https://drive.google.com/file/d/1kdbfXuJLwoVcDCSj-JlKsPSGIfz7GjQK/view?usp=sharing
+                                            sample_submission.csv - образец
+
+4. https://drive.google.com/file/d/1Xx69hloRiCNPA0H-UDXj-GXpZcTtskWj/view?usp=sharing
+                                            submission_v_bagg_xgb.csv - лучшее решение - прогноз цен
